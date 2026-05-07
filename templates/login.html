@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartPOS – Secure Login</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mint: #c8f0e0;
+    --lavender: #e2d9f3;
+    --peach: #fde8d8;
+    --sky: #d4eaf7;
+    --rose: #fcd5d5;
+    --cream: #fdfaf5;
+    --text: #2d2d2d;
+    --muted: #7a7a8c;
+    --accent: #5b4fcf;
+    --success: #2e9e6b;
+    --danger: #d94f4f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .bg-blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .blob1 { width: 500px; height: 500px; background: var(--lavender); top: -100px; left: -150px; animation: float 8s ease-in-out infinite; }
+  .blob2 { width: 400px; height: 400px; background: var(--mint); bottom: -80px; right: -80px; animation: float 10s ease-in-out infinite reverse; }
+  .blob3 { width: 300px; height: 300px; background: var(--peach); top: 40%; left: 60%; animation: float 7s ease-in-out infinite 2s; }
+  @keyframes float { 0%,100%{transform:translate(0,0);}50%{transform:translate(20px,-30px);} }
+  .card {
+    position: relative;
+    z-index: 10;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.9);
+    border-radius: 28px;
+    padding: 52px 48px;
+    width: 440px;
+    box-shadow: 0 20px 60px rgba(91,79,207,0.12), 0 4px 12px rgba(0,0,0,0.06);
+    animation: slideUp 0.6s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);} }
+  .logo-area { text-align: center; margin-bottom: 36px; }
+  .logo-icon {
+    width: 72px; height: 72px; border-radius: 20px;
+    background: linear-gradient(135deg, var(--accent), #8b7fe8);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 32px; margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(91,79,207,0.3);
+  }
+  .logo-area h1 { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); }
+  .logo-area p { color: var(--muted); font-size: 14px; margin-top: 4px; font-weight: 300; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+  .badge { font-size: 11px; padding: 4px 12px; border-radius: 20px; font-weight: 500; }
+  .badge-mint { background: var(--mint); color: #1a6e4a; }
+  .badge-lav { background: var(--lavender); color: #4a3d8f; }
+  .badge-peach { background: var(--peach); color: #9e5a2e; }
+  .form-group { margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+  input {
+    width: 100%; padding: 14px 18px; border-radius: 14px;
+    border: 2px solid #e8e8f0; background: #fafafa;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text);
+    transition: all 0.2s;
+  }
+  input:focus { outline: none; border-color: var(--accent); background: white; box-shadow: 0 0 0 4px rgba(91,79,207,0.1); }
+  .btn-login {
+    width: 100%; padding: 16px; border-radius: 14px; border: none;
+    background: linear-gradient(135deg, var(--accent), #8b7fe8);
+    color: white; font-size: 16px; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s; margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(91,79,207,0.35);
+  }
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(91,79,207,0.4); }
+  .btn-login:active { transform: translateY(0); }
+  .btn-login.loading { opacity: 0.7; pointer-events: none; }
+  .error-msg { background: var(--rose); color: var(--danger); padding: 12px 16px; border-radius: 10px; font-size: 14px; margin-top: 16px; display: none; }
+  .demo-creds { margin-top: 24px; padding: 16px; background: var(--sky); border-radius: 14px; }
+  .demo-creds h4 { font-size: 12px; font-weight: 600; color: #3a6d8f; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .cred-row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .cred-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .cred-btn:hover { transform: scale(1.02); }
+  .cred-admin { background: var(--lavender); color: #4a3d8f; }
+  .cred-cashier { background: var(--mint); color: #1a6e4a; }
+</style>
+</head>
+<body>
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+<div class="bg-blob blob3"></div>
+<div class="card">
+  <div class="logo-area">
+    <div class="logo-icon">🏪</div>
+    <h1>SmartPOS</h1>
+    <p>Fraud Prevention & Transaction Control</p>
+  </div>
+  <div class="badge-row">
+    <span class="badge badge-mint">✓ Real-time Monitoring</span>
+    <span class="badge badge-lav">✓ Rule Engine</span>
+    <span class="badge badge-peach">✓ Razorpay Payments</span>
+  </div>
+  <div class="form-group">
+    <label>Username</label>
+    <input type="text" id="username" placeholder="Enter username" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Enter password">
+  </div>
+  <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In to POS</button>
+  <div class="error-msg" id="errorMsg"></div>
+  <div class="demo-creds">
+    <h4>Quick Demo Login</h4>
+    <div class="cred-row">
+      <button class="cred-btn cred-admin" onclick="fillCreds('admin','admin123')">👑 Admin Login</button>
+      <button class="cred-btn cred-cashier" onclick="fillCreds('cashier1','cashier123')">🧾 Cashier Login</button>
+    </div>
+  </div>
+</div>
+<script>
+function fillCreds(u, p) {
+  document.getElementById('username').value = u;
+  document.getElementById('password').value = p;
+}
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('errorMsg');
+  btn.classList.add('loading');
+  btn.textContent = 'Signing in…';
+  err.style.display = 'none';
+  try {
+    const res = await fetch('/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      btn.textContent = '✓ Welcome!';
+      setTimeout(() => window.location.href = '/pos', 400);
+    } else {
+      err.textContent = '⚠ ' + (data.error || 'Login failed');
+      err.style.display = 'block';
+      btn.classList.remove('loading');
+      btn.textContent = 'Sign In to POS';
+    }
+  } catch(e) {
+    err.textContent = '⚠ Connection error';
+    err.style.display = 'block';
+    btn.classList.remove('loading');
+    btn.textContent = 'Sign In to POS';
+  }
+}
+document.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
