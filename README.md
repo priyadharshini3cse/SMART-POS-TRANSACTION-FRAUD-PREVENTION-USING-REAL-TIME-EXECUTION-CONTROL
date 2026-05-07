@@ -1,0 +1,2 @@
+# SMART-POS-TRANSACTION-FRAUD-PREVENTION-USING-REAL-TIME-EXECUTION-CONTROL
+A secure Smart POS system designed to detect and prevent fraudulent transactions using real-time execution control and intelligent monitoring techniques. This project focuses on improving payment security by analyzing transaction behavior, identifying suspicious activities instantly, and blocking unauthorized operations before completion.
